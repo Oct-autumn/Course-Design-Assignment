@@ -7,14 +7,17 @@
 typedef struct linkNode		//定义链表节点类
 {
 	public:
+		//指向上一节点的指针
+		linkNode* before;
 		//数据区
 		char filepath[PATH_LONG];
 		//指向下一节点的指针
-		struct linkNode* next;
+		linkNode* next;
 };
 
 linkNode* NewNode(const char filepath_save[PATH_LONG], linkNode* BeforeNode, linkNode* NextNode);	//预定义 创建新节点函数
-linkNode* TraverseFind(linkNode* head, long untilposi);												//预定义 查找节点函数
+void DeleteNode(linkNode* Node_todelete);														//预定义 删除节点函数
+linkNode* TraverseFind(linkNode* head, long untilposi);											//预定义 查找节点函数
 
 int main()		//主函数
 {
@@ -29,7 +32,15 @@ int main()		//主函数
 	BeforeNode = NewNode("!", BeforeNode, NULL);		//新建节点
 
 	//以下为查找特定链表项并输出的过程
-	long i = 4;											//要查找的项目标号
+	long i = 2;											//要查找的项目标号
+	if (!TraverseFind(Head, i))							//检查标号是否会使链表溢出
+	{
+		printf("Error: Linked list overflow!\n");
+		return 0;
+	}
+	printf("%s\n", TraverseFind(Head, i)->filepath);	//输出
+
+	DeleteNode(TraverseFind(Head, 2));
 	if (!TraverseFind(Head, i))							//检查标号是否会使链表溢出
 	{
 		printf("Error: Linked list overflow!\n");
@@ -48,10 +59,28 @@ linkNode* NewNode(const char filepath_save[PATH_LONG], linkNode* BeforeNode, lin
 
 	strcpy_s(p->filepath, filepath_save);							//将内容存储到新节点里
 	
-	if (BeforeNode != NULL) BeforeNode->next = p;					//若前一项置空，则在链表头部添加节点
-	p->next = NextNode;												//若后一项置空，则在链表尾部添加节点
+	//进行索引
+	if (BeforeNode) BeforeNode->next = p;							//若前一项存在，则向前一项添加索引
+	p->before = BeforeNode;										//新节点的前索引
+	p->next = NextNode;											//新节点的后索引
+	if (NextNode) NextNode->before = p;								//若后一项存在，则向后一项添加索引
 
 	return p;														//返回新节点的内存指针
+}
+
+void DeleteNode(linkNode* Node_todelete)	//预定义 删除节点函数
+{
+	linkNode* beforeNode = Node_todelete->before;	//找到上一节点
+	linkNode* nextNode = Node_todelete->next;		//找到下一节点
+	
+	//进行索引
+	beforeNode->next = nextNode;
+	nextNode->before = beforeNode;
+
+	//删除节点释放内存
+	free(Node_todelete);
+
+	return ;
 }
 
 linkNode* TraverseFind(linkNode* head, long untilposi)	//预定义 查找节点函数
