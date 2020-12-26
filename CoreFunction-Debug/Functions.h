@@ -1,6 +1,6 @@
 #pragma once
 
-#define PATH_LONG 1024
+#define PATH_LONG 4096
 
 #include <stdio.h>
 #include <io.h>
@@ -8,6 +8,8 @@
 #include <stdlib.h>
 
 #include "linkNode.h"   //链表操作定义
+
+int Sum = 0;                    //文件计数全局变量
 
 int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);
 int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);
@@ -31,7 +33,7 @@ int DfsFolder(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer, 
 
     strcat_s(current_path, "*"); //用\*来匹配所有
 
-    long handle = _findfirst(current_path, &file_info);  //文件句柄变量
+    intptr_t handle = _findfirst(current_path, &file_info);  //文件句柄变量
 
     if (-1 == handle)//若返回值为-1则认为无下一级目录
     {
@@ -72,7 +74,7 @@ int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     strcpy_s(findingPath, path);
     strcat_s(findingPath, filename);
 
-    long handle = _findfirst(findingPath, &file_info); //文件句柄变量
+    intptr_t handle = _findfirst(findingPath, &file_info); //文件句柄变量
 
     if (-1 == handle)
     {
@@ -113,7 +115,7 @@ int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     strcpy_s(findingPath, path);
     strcat_s(findingPath, "*");//拼接‘*’以匹配所有类型
 
-    long handle = _findfirst(findingPath, &file_info); //文件句柄变量
+    intptr_t handle = _findfirst(findingPath, &file_info); //文件句柄变量
     if (-1 == handle)
     {
         return 0;

@@ -20,6 +20,9 @@ MENU_START:
     printf("*     2-模糊搜索（耗时较长）               *\n");
     printf("*                                          *\n");
     printf("*     0-退出                               *\n");
+    printf("*                                          *\n");
+    printf("* 注意：本程序使用链表存储文件地址，在搜索 *\n");
+    printf("*       时会占用部分内存资源               *\n");
     printf("********************************************\n");
     printf("请选择搜索功能：");
 
@@ -51,6 +54,7 @@ MENU_START:
         DfsFolder(path, filename, 0, 1);
 
         //输出搜索结果并清理资源
+        printf("共找到相关文件(夹)%d个\n************\n", Sum);
         printf(Head);
         DeleteLink(Head);
 
@@ -75,6 +79,7 @@ MENU_START:
         DfsFolder(path, filename, 0, 2);
 
         //输出搜索结果并清理资源
+        printf("共找到相关文件(夹)%d个\n*****", Sum);
         printf(Head);
         DeleteLink(Head);
 

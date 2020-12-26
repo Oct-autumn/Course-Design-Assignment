@@ -18,11 +18,9 @@ static linkNode *Head = NULL;       //定义 静态链表头
 static linkNode *BeforeNode = NULL; //定义 前一节点指针
 static linkNode *NextNode = NULL;   //定义 后一节点指针
 
-int Sum = 0;                    //文件计数全局变量
-
 linkNode *NewNode(char filePath_tosave[PATH_LONG], linkNode *beforeNode, linkNode *nextNode)
 {
-    linkNode* Node = (linkNode*)malloc(sizeof(linkNode*)+8);
+    linkNode* Node = (linkNode*)malloc(sizeof(linkNode*)+16);
     if (Node == NULL) exit(-1);
 
     long MemorySize = sizeof(char) * strlen(filePath_tosave) + 1;
