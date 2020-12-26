@@ -7,19 +7,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct linkNode     //定义 存储文件路径的链表节点类
-{
-    char filePath[PATH_LONG];
-    linkNode* next;
-};
+#include "linkNode.h"   //链表操作定义
 
-static linkNode* Head = NULL;     //链表头 文件路径记录
-int Sum = 0;                    //文件计数全局变量
-
-int DfsFolder(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer, int type);//深度遍历文件目录
-int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);//在当前目录层内精确文件查找
-int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);//在当前目录层内模糊文件查找
-void AddFilePath(char path[PATH_LONG + 1], char filename[FILENAME_MAX], linkNode* head);//输出函数
+int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);
+int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);
+void AddFilePath(char path[PATH_LONG + 1], char filename[FILENAME_MAX], linkNode* head);
 
 int DfsFolder(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer, int type)   //深度遍历文件目录函数
 {
@@ -89,7 +81,7 @@ int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     {
         if (strcmp(file_info.name, "..") != 0 && strcmp(file_info.name, ".") != 0)
         {
-            AddFilePath(path, file_info.name);
+            AddFilePath(path, file_info.name, Head);
             Sum++; //总文件计数加一
             LayerFiles++;   //该层目录内文件数加一
         }
@@ -99,7 +91,7 @@ int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
         {
             if (strcmp(file_info.name, "..") != 0 && strcmp(file_info.name, ".") != 0)
             {
-                AddFilePath(path, file_info.name);
+                AddFilePath(path, file_info.name, Head);
                 Sum++; //总文件计数加一
                 LayerFiles++;   //该层目录内文件数加一
             }
@@ -131,7 +123,7 @@ int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
         {
             if (strstr(file_info.name, filename))   //匹配关键字
             {
-                AddFilePath(path, file_info.name);
+                AddFilePath(path, file_info.name, Head);
                 Sum++; //总文件计数加一
                 LayerFiles++;   //该层目录内文件数加一
 
@@ -144,30 +136,12 @@ int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     return LayerFiles;
 }//当前目录层内模糊文件查找函数
 
-void AddFilePath(char path[PATH_LONG + 1], char filename[FILENAME_MAX], linkNode* head)
+void AddFilePath(char path[PATH_LONG + 1], char filename[FILENAME_MAX], linkNode *head)
 {
     char filepath[PATH_LONG + FILENAME_MAX + 1];
 
-    strcpy(filepath, path);
-    strcat(filepath, filename);
+    strcpy_s(filepath, path);
+    strcat_s(filepath, filename);
 
-    NewNode(filepath, );
-
-    printf("%d: %s", Sum, path);
-    printf("%s\n", filename);
-}
-
-linkNode* NewNode(char filePath_tosave[PATH_LONG], linkNode* beforeNode, linkNode* nextNode)
-{
-    linkNode* Node = (linkNode*)malloc(sizeof(linkNode));
-
-    if (Node == NULL) exit(-1);
-
-    strcpy(Node->filePath, filePath_tosave);
-    Node->next = NULL;
-
-    if (beforeNode) beforeNode->next = Node;
-    if (nextNode) Node->next = nextNode;
-
-    return Node;
+    NewNode(filepath, BeforeNode, NULL);
 }

@@ -35,28 +35,48 @@ MENU_START:
     case '0':
         return 0;
     case '1':
+        //获取搜索路径与文件名
         printf("Please ENTER the Root-Path of Finding:(Example:C:\\windows\\)\n");
         gets_s(path);
         printf("Please ENTER the Name of file:\n");
         gets_s(filename);
         printf("\n");
 
+        //创建暂存链表
+        Head = NewNode((char*)"Start", NULL, NULL);
+        BeforeNode = Head;
+
+        //清空文件计数并开始搜索
         Sum = 0;
         DfsFolder(path, filename, 0, 1);
+
+        //输出搜索结果并清理资源
+        printf(Head);
+        DeleteLink(Head);
 
         if (Sum == 0) printf("None File was found.\n");
         printf("\n");
         goto MENU_START;
         break;
     case '2':
+        //获取搜索路径与文件名
         printf("Please ENTER the Root-Path of Finding:(Example:C:\\windows\\)\n");
         gets_s(path);
         printf("Please ENTER the Key-Word:\n");
         gets_s(filename);
         printf("\n");
 
+        //创建暂存链表
+        Head = NewNode((char*)"Start", NULL, NULL);
+        BeforeNode = Head;
+
+        //清空文件计数并开始搜索
         Sum = 0;
         DfsFolder(path, filename, 0, 2);
+
+        //输出搜索结果并清理资源
+        printf(Head);
+        DeleteLink(Head);
 
         if (Sum == 0) printf("None File was found.\n");
         printf("\n");
