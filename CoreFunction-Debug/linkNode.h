@@ -1,12 +1,15 @@
 #pragma once
 
+#include <stdio.h>
+#include <string.h>
+
 typedef struct linkNode		//定义链表节点类
 {
 public:
     //指向上一节点的指针
     linkNode *before;
     //数据区
-    char filepath[PATH_LONG];
+    char *filepath;
     //指向下一节点的指针
     linkNode *next;
 };
@@ -19,11 +22,11 @@ int Sum = 0;                    //文件计数全局变量
 
 linkNode *NewNode(char filePath_tosave[PATH_LONG], linkNode *beforeNode, linkNode *nextNode)
 {
-    linkNode *Node = (linkNode*)malloc(sizeof(linkNode));
+    linkNode *Node = (linkNode*)malloc(sizeof(linkNode*)+sizeof(char)*strlen(filePath_tosave)+sizeof(linkNode*));
 
     if (Node == NULL) exit(-1);
 
-    strcpy_s(Node->filepath, filePath_tosave);
+    strcpy_s(Node->filepath, strlen(filePath_tosave), filePath_tosave);
     Node->next = NULL;
 
     if (beforeNode) beforeNode->next = Node;
@@ -34,21 +37,18 @@ linkNode *NewNode(char filePath_tosave[PATH_LONG], linkNode *beforeNode, linkNod
     return Node;
 }
 
-void DeleteLink(linkNode *head)             //删除链表
+linkNode* DeleteLink(linkNode *head)             //删除链表
 {
-    linkNode *PresentNode = head, *NextNode = head->next;
+    linkNode *PresentNode = head, *NextNode = NULL;
 
     while (PresentNode)
     {
+        NextNode = PresentNode->next;
         free(PresentNode);
         PresentNode = NextNode;
-        NextNode = PresentNode->next;
-
     }
 
-    head = NULL;
-
-    return ;
+    return NULL;
 }
 
 int DeleteNode(linkNode* Node_todelete)     //删除链表中指定节点
@@ -93,13 +93,13 @@ int DeleteNode(linkNode* head, int number)  //删除链表中指定位置的节点
 
 int printf(linkNode* head)                 //输出链表
 {
-    linkNode* PresentNode = head;
+    linkNode* PresentNode = head->next;
     
     if (PresentNode)
     {
         while (PresentNode)
         {
-            printf("%s", PresentNode->filepath);
+            printf("%s\n", PresentNode->filepath);
             PresentNode = PresentNode->next;
         }
         return 0;

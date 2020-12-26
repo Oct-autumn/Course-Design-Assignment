@@ -31,7 +31,7 @@ int DfsFolder(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer, 
 
     strcat_s(current_path, "*"); //用\*来匹配所有
 
-    int handle = _findfirst(current_path, &file_info);  //文件句柄变量
+    intptr_t handle = _findfirst(current_path, &file_info);  //文件句柄变量
 
     if (-1 == handle)//若返回值为-1则认为无下一级目录
     {
@@ -72,7 +72,7 @@ int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     strcpy_s(findingPath, path);
     strcat_s(findingPath, filename);
 
-    long handle = _findfirst(findingPath, &file_info); //文件句柄变量
+    intptr_t handle = _findfirst(findingPath, &file_info); //文件句柄变量
     if (-1 == handle)
     {
         return 0;
@@ -112,7 +112,7 @@ int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     strcpy_s(findingPath, path);
     strcat_s(findingPath, "*");//拼接‘*’以匹配所有类型
 
-    long handle = _findfirst(findingPath, &file_info); //文件句柄变量
+    intptr_t handle = _findfirst(findingPath, &file_info); //文件句柄变量
     if (-1 == handle)
     {
         return 0;
@@ -143,5 +143,5 @@ void AddFilePath(char path[PATH_LONG + 1], char filename[FILENAME_MAX], linkNode
     strcpy_s(filepath, path);
     strcat_s(filepath, filename);
 
-    NewNode(filepath, BeforeNode, NULL);
+    BeforeNode = NewNode(filepath, BeforeNode, NULL);
 }
