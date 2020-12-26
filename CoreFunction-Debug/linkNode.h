@@ -22,11 +22,14 @@ int Sum = 0;                    //文件计数全局变量
 
 linkNode *NewNode(char filePath_tosave[PATH_LONG], linkNode *beforeNode, linkNode *nextNode)
 {
-    linkNode *Node = (linkNode*)malloc(sizeof(linkNode*)+sizeof(char)*strlen(filePath_tosave)+sizeof(linkNode*));
-
+    linkNode* Node = (linkNode*)malloc(sizeof(linkNode*)+8);
     if (Node == NULL) exit(-1);
 
-    strcpy_s(Node->filepath, strlen(filePath_tosave), filePath_tosave);
+    long MemorySize = sizeof(char) * strlen(filePath_tosave) + 1;
+    Node->filepath = (char*)malloc(MemorySize);
+    if (Node->filepath == NULL) exit(-1);
+
+    strcpy_s(Node->filepath, MemorySize, filePath_tosave);
     Node->next = NULL;
 
     if (beforeNode) beforeNode->next = Node;
@@ -44,6 +47,7 @@ linkNode* DeleteLink(linkNode *head)             //删除链表
     while (PresentNode)
     {
         NextNode = PresentNode->next;
+        free(PresentNode->filepath);
         free(PresentNode);
         PresentNode = NextNode;
     }
@@ -59,6 +63,7 @@ int DeleteNode(linkNode* Node_todelete)     //删除链表中指定节点
         Node_todelete->before->next = Node_todelete->next;
         Node_todelete->next->before = Node_todelete->before;
         //删除节点并释放内存
+        free(Node_todelete->filepath);
         free(Node_todelete);
 
         return 0;
