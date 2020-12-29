@@ -16,6 +16,12 @@ int CreatCheck(HWND hwnd,int ErrorCode)
                                     L"Error", MB_OK | MB_ICONERROR); break;
             case 5:MessageBox(hwnd, L"Could not create the TextBox2.E-005", 
                                     L"Error", MB_OK | MB_ICONERROR); break;
+            case 6:MessageBox(hwnd, L"Could not create the FileList.E-006",
+                                    L"Error", MB_OK | MB_ICONERROR); break;
+            case 7:MessageBox(hwnd, L"Could not create the CheckBox1.E-007",
+                                    L"Error", MB_OK | MB_ICONERROR); break;
+            case 8:MessageBox(hwnd, L"Could not create the CheckBox2.E-008",
+                                    L"Error", MB_OK | MB_ICONERROR); break;
         }
         return 0;
     }

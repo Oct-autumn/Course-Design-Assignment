@@ -7,6 +7,9 @@
 #define UID_Label1				301
 #define UID_Label2				302
 #define UID_StartSearch			401
+#define UID_FileList			501
+#define UID_SearchMode			601
+#define UID_StatusBar			1000
 
 
 // Next default values for new objects

@@ -28,7 +28,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
         (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX),            // 窗口风格
 
         // 窗口的位置与大小
-        CW_USEDEFAULT, CW_USEDEFAULT, 500, 250,
+        CW_USEDEFAULT, CW_USEDEFAULT, 500, 280,
 
         NULL,       // 父级窗口
         NULL,       // 窗口菜单

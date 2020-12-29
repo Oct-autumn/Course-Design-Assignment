@@ -9,6 +9,8 @@
 // Windows 头文件
 #include <windows.h>
 #include <windowsx.h>
+//
+#include <CommCtrl.h>
 // C 运行时头文件
 #include <stdlib.h>
 #include <malloc.h>

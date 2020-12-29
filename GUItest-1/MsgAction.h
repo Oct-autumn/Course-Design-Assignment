@@ -1,5 +1,8 @@
 #pragma once
 static HINSTANCE Instance;
+static char ProgramStatus[1024];
+
+#include "Functions-1.h"	//内含专有函数
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)     //主窗口
 {
@@ -7,9 +10,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     {
     case WM_CREATE:
     {
-        Label1 = CreateWindowEx     //创建“搜索根目录”静态文本框
+        Label1 = CreateWindow     //创建“搜索根目录”静态文本框
         (
-            0,
             Label_CLASS_NAME,
             L"搜索根目录：",
             (WS_CHILD | WS_VISIBLE),
@@ -20,14 +22,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             NULL
         );
         CreatCheck(Label1, 2);
-        
-        TextBox_RootPath = CreateWindowEx     //创建“搜索根目录”文本编辑框
+
+        TextBox_RootPath = CreateWindow     //创建“搜索根目录”文本编辑框
         (
-            WS_EX_CLIENTEDGE,
             TextBox_CLASS_NAME,
             L"",
-            (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL),
-            10, 35, 400, 25,
+            (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_BORDER),
+            10, 35, 450, 25,
             hwnd,
             (HMENU)UID_TextBox_RootPath,
             Instance,
@@ -35,9 +36,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         );
         CreatCheck(TextBox_RootPath, 3);
 
-        Label2 = CreateWindowEx     //创建“文件名”静态文本框
+        Label2 = CreateWindow     //创建“文件名”静态文本框
         (
-            0,
             Label_CLASS_NAME,
             L"文件名：",
             (WS_CHILD | WS_VISIBLE),
@@ -49,12 +49,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         );
         CreatCheck(Label2, 4);
 
-        TextBox_FileName = CreateWindowEx     //创建“文件名”文本编辑框
+        TextBox_FileName = CreateWindow     //创建“文件名”文本编辑框
         (
-            WS_EX_CLIENTEDGE,
             TextBox_CLASS_NAME,
             L"",
-            (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL),
+            (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_BORDER),
             10, 85, 200, 25,
             hwnd,
             (HMENU)UID_TextBox_FileName,
@@ -63,20 +62,73 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         );
         CreatCheck(TextBox_FileName, 5);
 
-        Start_Search = CreateWindowEx     //创建“开始搜索”按钮
+        Start_Search = CreateWindow     //创建“开始搜索”按钮
         (
-            0,
             Button_CLASS_NAME,
             L"开始搜索",
             (WS_CHILD | WS_VISIBLE | WS_BORDER | BS_FLAT),
-            300, 70, 100, 40,
+            360, 70, 100, 40,
             hwnd,
             (HMENU)UID_StartSearch,
             Instance,
             NULL
         );
         CreatCheck(TextBox_FileName, 5);
+
+        FileList = CreateWindow         //创建文件地址列表
+        (
+            List_CLASS_NAME,
+            L"",
+            (WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL),
+            10, 120, 450, 75,
+            hwnd,
+            (HMENU)UID_FileList,
+            Instance,
+            NULL
+        );
+        CreatCheck(FileList, 6);
+
+        ChoseButton1 = CreateWindow     //创建“精确查找”单选框
+        (
+            CheckBox_CLASS_NAME,
+            L"精确查找",
+            (WS_CHILD | WS_VISIBLE | BS_LEFT | BS_AUTORADIOBUTTON | WS_GROUP),
+            230, 70, 125, 25,
+            hwnd,
+            (HMENU)UID_SearchMode,
+            Instance,
+            NULL
+        );
+        CreatCheck(ChoseButton1, 7);
+
+        ChoseButton2 = CreateWindow     //创建“模糊查找”单选框
+        (
+            CheckBox_CLASS_NAME,
+            L"模糊查找",
+            (WS_CHILD | WS_VISIBLE | BS_LEFT | BS_AUTORADIOBUTTON),
+            230, 95, 125, 25,
+            hwnd,
+            (HMENU)UID_SearchMode,
+            Instance,
+            NULL
+        );
+        CreatCheck(ChoseButton2, 8);
+
+        Status = CreateWindow
+        (
+            STATUSCLASSNAME,
+            (PCTSTR)NULL,
+            (WS_CHILD | WS_VISIBLE),
+            0, 0, 0, 0,
+            hwnd,
+            (HMENU)UID_StatusBar,
+            Instance,
+            NULL
+        );                   
         
+        SendMessage(ChoseButton1, BM_SETCHECK, BST_CHECKED, NULL);
+        SendMessage(Status, WM_SETTEXT, NULL, (LPARAM)L"就绪.");
+
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
 
@@ -95,9 +147,27 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 GetWindowText(TextBox_RootPath, RootPath, 256);
                 GetWindowText(TextBox_FileName, FileName, 260);
                 
+                if (SendMessage(ChoseButton1, BM_GETCHECK, NULL, NULL) == BST_CHECKED)  //进行精确查找
+                {
+                    MessageBox(hwnd, L"精确搜索开始", L"提示", MB_OK);
+                    DfsFolder(RootPath, FileName, 0, 1);
+                }
+                if (SendMessage(ChoseButton2, BM_GETCHECK, NULL, NULL) == BST_CHECKED)  //进行模糊查找
+                {
+                    MessageBox(hwnd, L"模糊搜索开始", L"提示", MB_OK);
+                    DfsFolder(RootPath, FileName, 0, 2);
+                }
+            }
 
-
-
+            break;
+        case UID_SearchMode:
+            if (SendMessage(ChoseButton1, BM_GETCHECK, NULL, NULL) == BST_CHECKED)  //进行精确查找
+            {
+                SendMessage(Label2, WM_SETTEXT, NULL, (LPARAM)L"文件名：");
+            }
+            if (SendMessage(ChoseButton2, BM_GETCHECK, NULL, NULL) == BST_CHECKED)  //进行模糊查找
+            {
+                SendMessage(Label2, WM_SETTEXT, NULL, (LPARAM)L"关键字：");
             }
 
             break;
