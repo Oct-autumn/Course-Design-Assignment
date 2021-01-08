@@ -14,3 +14,4 @@ static HWND ChoseButton1;
 static HWND Label4;
 static HWND ChoseButton2;
 static HWND Status;
+static HWND ShowHidden_CheckBox;

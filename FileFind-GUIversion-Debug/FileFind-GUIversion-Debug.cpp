@@ -17,6 +17,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    Help(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK Setting(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -265,11 +266,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_USERHELP:
                     DialogBox(Instance, MAKEINTRESOURCE(IDD_USERHELP), hWnd, Help);
                     break;
+                case IDM_SETTING:
+                    DialogBox(Instance, MAKEINTRESOURCE(IDD_SearchSetting), hWnd, Setting);
+                    break;
                 }
                 
                 {//按钮操作分析
                 case UID_StartSearch:
-                    if (MessageBox(hwnd, L"即将开始搜索\n注意，搜索期间不能终止\n开始搜索吗？", L"提示", MB_OKCANCEL) == IDOK)   //显示提示
+                    if (MessageBox(hwnd, L"即将开始搜索\n注意，搜索期间不能中止，较多的搜索项将占用较多时间\n开始搜索吗？", L"提示", MB_OKCANCEL) == IDOK)   //显示提示
                     {
                         TCHAR RootPath_w[PATH_LONG];
                         TCHAR FileName_w[FILENAME_MAX];
@@ -281,6 +285,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                         ExchCheck(WCtoMB((wchar_t*)RootPath_w, RootPath, sizeof(RootPath) / sizeof(RootPath[0])), 1);
                         ExchCheck(WCtoMB((wchar_t*)FileName_w, FileName, sizeof(FileName) / sizeof(FileName[0])), 1);
+
+                        //检查是否漏掉了路径末尾的'\'
+                        if (RootPath[strlen(RootPath) - 1] != '\\')
+                        {
+                            strcat_s(RootPath, "\\");
+                            ExchCheck(MBtoWC(RootPath, RootPath_w, sizeof(RootPath_w) / sizeof(RootPath_w[0])), 1);
+                            SetWindowText(TextBox_RootPath, RootPath_w);
+                        }
 
                         if (SendMessage(ChoseButton1, BM_GETCHECK, NULL, NULL) == BST_CHECKED)  //进行精确查找
                         {
@@ -380,6 +392,65 @@ INT_PTR CALLBACK Help(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
     switch (message)
     {
+    case WM_CLOSE:
+        EndDialog(hDlg, LOWORD(wParam));
+        return (INT_PTR)TRUE;
+        break;
+
+    }
+    return (INT_PTR)FALSE;
+}
+
+INT_PTR CALLBACK Setting(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(lParam);
+
+    switch (message)
+    {
+    case WM_PAINT:
+    {
+        ShowHidden_CheckBox = CreateWindowEx               //创建“搜索根目录”静态文本框
+        (
+            0,
+            CheckBox_CLASS_NAME,
+            L"搜索隐藏文件（夹）",
+            (WS_CHILD | WS_VISIBLE | BS_CHECKBOX),
+            10, 10, 150, 25,
+            hDlg,
+            (HMENU)UID_ShowHidden,
+            Instance,
+            NULL
+        );
+        CreatCheck(ShowHidden_CheckBox, 2);
+
+        if (ShowHidden)
+        {
+            SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_CHECKED, NULL);
+        }
+        break;
+    }
+    case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+
+        switch (wmId)
+        {
+            case UID_ShowHidden:
+            {
+                if (SendMessage(ShowHidden_CheckBox, BM_GETCHECK, NULL, NULL) == BST_CHECKED)
+                {
+                    ShowHidden = 0;
+                    SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_UNCHECKED, NULL);
+                }
+                else
+                {
+                    ShowHidden = 1;
+                    SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_CHECKED, NULL);
+                }
+            }
+        }
+        break;
+    }    
     case WM_CLOSE:
         EndDialog(hDlg, LOWORD(wParam));
         return (INT_PTR)TRUE;

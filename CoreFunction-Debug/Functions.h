@@ -13,6 +13,7 @@
 
 
 int Sum = 0;                    //文件计数全局变量
+char ShowHidden = 0;            //显示隐藏文件与否
 
 int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);
 int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer);
@@ -45,9 +46,9 @@ int DfsFolder(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer, 
 
     do
     {
-        if (strcmp(file_info.name, "..") != 0 && strcmp(file_info.name, ".") != 0)//.是当前目录，..是上层目录，必须排除掉这两种情况
+        if (strcmp(file_info.name, "..") != 0 && strcmp(file_info.name, ".") != 0 && (file_info.attrib & _A_SUBDIR))//.是当前目录，..是上层目录，必须排除掉这两种情况 并 判断是否为子目录
         {
-            if (file_info.attrib == _A_SUBDIR)//判断是否为子目录
+            if (ShowHidden == '1')
             {
                 char path_NEW[PATH_LONG + 1];
                 strcpy_s(path_NEW, path); //获取查找路径
@@ -56,6 +57,19 @@ int DfsFolder(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer, 
                 strcat_s(path_NEW, "\\");
 
                 DfsFolder(path_NEW, filename, layer + 1, type);//递归遍历子目录
+            }
+            else
+            {
+                if (!(file_info.attrib & _A_HIDDEN))
+                {
+                    char path_NEW[PATH_LONG + 1];
+                    strcpy_s(path_NEW, path); //获取查找路径
+
+                    strcat_s(path_NEW, file_info.name);//在windows下可以用转义分隔符，不推荐
+                    strcat_s(path_NEW, "\\");
+
+                    DfsFolder(path_NEW, filename, layer + 1, type);//递归遍历子目录
+                }
             }
         }
     } while (!_findnext(handle, &file_info));//返回0则继续遍历
@@ -85,23 +99,28 @@ int FindFile_1(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
     }
     else
     {
-        if (strcmp(file_info.name, "..") != 0 && strcmp(file_info.name, ".") != 0)
-        {
-            AddFilePath(path, file_info.name, Head);
-            Sum++; //总文件计数加一
-            LayerFiles++;   //该层目录内文件数加一
-        }
-
-
-        while (!_findnext(handle, &file_info))
+        do
         {
             if (strcmp(file_info.name, "..") != 0 && strcmp(file_info.name, ".") != 0)
             {
-                AddFilePath(path, file_info.name, Head);
-                Sum++; //总文件计数加一
-                LayerFiles++;   //该层目录内文件数加一
+                if (ShowHidden == '1')
+                {
+                    AddFilePath(path, file_info.name, Head);
+                    Sum++; //总文件计数加一
+                    LayerFiles++;   //该层目录内文件数加一
+                }
+                else
+                {
+                    if (!(file_info.attrib & _A_HIDDEN))
+                    {
+                        AddFilePath(path, file_info.name, Head);
+                        Sum++; //总文件计数加一
+                        LayerFiles++;   //该层目录内文件数加一
+                    }
+                }
+                
             }
-        }
+        }while (!_findnext(handle, &file_info));
     }
 
     _findclose(handle);
@@ -129,10 +148,21 @@ int FindFile_2(char path[PATH_LONG + 1], char filename[FILENAME_MAX], int layer)
         {
             if (strstr(file_info.name, filename))   //匹配关键字
             {
-                AddFilePath(path, file_info.name, Head);
-                Sum++; //总文件计数加一
-                LayerFiles++;   //该层目录内文件数加一
-
+                if (ShowHidden == '1')
+                {
+                    AddFilePath(path, file_info.name, Head);
+                    Sum++; //总文件计数加一
+                    LayerFiles++;   //该层目录内文件数加一
+                }
+                else
+                {
+                    if (!(file_info.attrib & _A_HIDDEN))
+                    {
+                        AddFilePath(path, file_info.name, Head);
+                        Sum++; //总文件计数加一
+                        LayerFiles++;   //该层目录内文件数加一
+                    }
+                }
             }
         } while (!_findnext(handle, &file_info));
     }

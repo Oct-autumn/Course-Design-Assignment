@@ -21,6 +21,8 @@ Oct-Autumn——2020 - 12 - 26
 
 #include "Functions.h"
 
+char Func = 0;
+
 int main()
 {
 MENU_START:
@@ -37,8 +39,17 @@ MENU_START:
     printf("********************************************\n");
     printf("请选择搜索功能：");
 
-    char Func = 0;
     Func = getchar();
+    getchar();
+
+    printf("********************************************\n");
+    printf("* 是否显示隐藏文件（夹）？                 *\n");
+    printf("* 1-是                                     *\n");
+    printf("* 0-否                                     *\n");
+    printf("********************************************\n");
+    printf("请选择：");
+
+    ShowHidden = getchar();
     getchar();
 
     char path[PATH_LONG + 1];
@@ -49,6 +60,7 @@ MENU_START:
     case '0':
         return 0;
     case '1':
+    {
         //获取搜索路径与文件名
         printf("Please ENTER the Root-Path of Finding:(Example:C:\\windows\\)\n");
         gets_s(path);
@@ -65,7 +77,7 @@ MENU_START:
         DfsFolder(path, filename, 0, 1);
 
         //输出搜索结果并清理资源
-        printf("共找到相关文件(夹)%d个\n************\n", Sum);
+        printf("共找到相关文件（夹）%d个\n**************************\n", Sum);
         printf(Head);
         DeleteLink(Head);
 
@@ -73,7 +85,9 @@ MENU_START:
         printf("\n");
         goto MENU_START;
         break;
+    }
     case '2':
+    {
         //获取搜索路径与文件名
         printf("Please ENTER the Root-Path of Finding:(Example:C:\\windows\\)\n");
         gets_s(path);
@@ -90,7 +104,7 @@ MENU_START:
         DfsFolder(path, filename, 0, 2);
 
         //输出搜索结果并清理资源
-        printf("共找到相关文件(夹)%d个\n*****", Sum);
+        printf("共找到相关文件（夹）%d个\n*****", Sum);
         printf(Head);
         DeleteLink(Head);
 
@@ -98,6 +112,7 @@ MENU_START:
         printf("\n");
         goto MENU_START;
         break;
+    }
     default:goto MENU_START;
     }
 
