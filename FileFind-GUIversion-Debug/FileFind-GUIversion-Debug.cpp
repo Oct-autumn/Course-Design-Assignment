@@ -193,7 +193,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (
                     List_CLASS_NAME,
                     L"",
-                    (WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL),
+                    (WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | LBS_NOTIFY),
                     10, 120, 450, 75,
                     hWnd,
                     (HMENU)UID_FileList,
@@ -249,7 +249,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
+            WORD wNotifyCode = HIWORD(wParam);
+            WORD wmId = LOWORD(wParam);
             
             switch (wmId)
             {
@@ -273,7 +274,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 
                 {//按钮操作分析
                 case UID_StartSearch:
-                    if (MessageBox(hwnd, L"即将开始搜索\n注意，搜索期间不能中止，较多的搜索项将占用较多时间\n开始搜索吗？", L"提示", MB_OKCANCEL) == IDOK)   //显示提示
+                    if (MessageBox(hWnd, L"即将开始搜索\n注意，搜索期间不能中止，较多的搜索项将占用较多时间\n开始搜索吗？", L"提示", MB_OKCANCEL) == IDOK)   //显示提示
                     {
                         TCHAR RootPath_w[PATH_LONG];
                         TCHAR FileName_w[FILENAME_MAX];
@@ -333,9 +334,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     break;
                 }
-                
-                break;
 
+                case UID_FileList:
+                {
+                    switch (wNotifyCode)
+                    {
+                        //文件列表操作分析
+                        case LBN_DBLCLK:
+                        {
+                            wchar_t RootPath_w[PATH_LONG];
+                            WORD Cursel = SendMessage(FileList, LB_GETCURSEL, NULL, NULL);
+                            SendMessage(FileList, LB_GETTEXT, Cursel, (LPARAM)RootPath_w);
+
+                            
+
+                            wcscat(RootPath_w, L"\n（已复制到剪贴板）");
+
+                            MessageBox(hWnd, RootPath_w, L"位置", MB_OK);
+                            
+                            break;
+                        }
+                                                                        
+                    default:
+                        break;
+                    }
+                    
+                    
+                }
+
+                /*
+                
+                */
+            
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
