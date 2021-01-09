@@ -44,3 +44,13 @@ int ExchCheck(int result, int ErrorCode)
     }
     return 1;
 }
+
+int OpenClipboard()
+{
+    if (!OpenClipboard(0))
+    {
+        MessageBox(hwnd, L"Cannot open the clipboard.E-201", L"Error", MB_OK | MB_ICONERROR);
+        return -1;
+    }
+    return 0;
+}

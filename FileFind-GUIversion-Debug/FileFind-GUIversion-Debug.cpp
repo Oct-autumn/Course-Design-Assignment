@@ -343,14 +343,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         case LBN_DBLCLK:
                         {
                             wchar_t RootPath_w[PATH_LONG];
+                            char RootPath[PATH_LONG];
+
                             WORD Cursel = SendMessage(FileList, LB_GETCURSEL, NULL, NULL);
                             SendMessage(FileList, LB_GETTEXT, Cursel, (LPARAM)RootPath_w);
 
+                            WCtoMB(RootPath_w, RootPath, sizeof(RootPath) / sizeof(RootPath[0]));
+
+                            if (OpenClipboard()) return -1;
+
+                            wchar_t Msg[PATH_LONG + 23];
+                            
+                            {//将文件路径复制到剪贴板
+                                EmptyClipboard();   //清空剪贴板
+
+                                //分配全局内存
+                                HGLOBAL hMem;
+                                hMem = GlobalAlloc(GMEM_MOVEABLE, strlen(RootPath) + 1);
+
+                                if (hMem == NULL)
+                                {
+                                    CloseClipboard();
+                                    return -1;
+                                }
+
+                                //拷贝数据到剪贴板内存
+                                LPTSTR lpStr = (LPTSTR)GlobalLock(hMem);
+
+                                strcpy_s((char*)lpStr, strlen(RootPath) + 1, RootPath);
+
+                                GlobalUnlock(hMem);
+
+                                //设置数据到剪贴板
+                                SetClipboardData(CF_TEXT, hMem);
+
+                                //关闭剪贴板
+                                CloseClipboard();
+
+                                wcscpy_s(Msg, RootPath_w);
+                                wcscat_s(Msg, L"\n（已复制到剪贴板）\n要打开文件所在位置吗？");
+                            }
                             
 
-                            wcscat(RootPath_w, L"\n（已复制到剪贴板）");
-
-                            MessageBox(hWnd, RootPath_w, L"位置", MB_OK);
+                            if (MessageBox(hWnd, Msg, L"位置", MB_OKCANCEL) == MB_OK)
+                            {
+                                HWND handle = NULL;
+                                ShellExecute(handle, L"explore", RootPath_w, NULL, NULL, SW_SHOWNORMAL);
+                            }
                             
                             break;
                         }
@@ -360,12 +399,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     
                     
-                }
-
-                /*
-                
-                */
-            
+                }            
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }

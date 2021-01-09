@@ -46,7 +46,7 @@ wchar_t* MBtoWC(char* MultiBite)
 
     if ((sizeof(WideChar)) / sizeof(WideChar[0]) < MinBite) return 0;
 
-    MultiByteToWideChar(CP_OEMCP, 0, MultiBite, -1, WideChar, sizeof(WideChar)) / sizeof(WideChar[0]);
+    MultiByteToWideChar(CP_OEMCP, 0, MultiBite, -1, WideChar, sizeof(WideChar) / sizeof(WideChar[0]));
 
     return WideChar;
 }
