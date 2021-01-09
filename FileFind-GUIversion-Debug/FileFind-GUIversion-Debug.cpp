@@ -193,7 +193,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (
                     List_CLASS_NAME,
                     L"",
-                    (WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL),
+                    (WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | LBS_NOTIFY),
                     10, 120, 450, 75,
                     hWnd,
                     (HMENU)UID_FileList,
@@ -249,7 +249,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
+            WORD wNotifyCode = HIWORD(wParam);
+            WORD wmId = LOWORD(wParam);
             
             switch (wmId)
             {
@@ -273,7 +274,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 
                 {//按钮操作分析
                 case UID_StartSearch:
-                    if (MessageBox(hwnd, L"即将开始搜索\n注意，搜索期间不能中止，较多的搜索项将占用较多时间\n开始搜索吗？", L"提示", MB_OKCANCEL) == IDOK)   //显示提示
+                    if (MessageBox(hWnd, L"即将开始搜索\n注意，搜索期间不能中止，较多的搜索项将占用较多时间\n开始搜索吗？", L"提示", MB_OKCANCEL) == IDOK)   //显示提示
                     {
                         TCHAR RootPath_w[PATH_LONG];
                         TCHAR FileName_w[FILENAME_MAX];
@@ -333,9 +334,74 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     break;
                 }
-                
-                break;
 
+                case UID_FileList:
+                {
+                    switch (wNotifyCode)
+                    {
+                        //文件列表操作分析
+                        case LBN_DBLCLK:
+                        {
+                            wchar_t RootPath_w[PATH_LONG];
+                            char RootPath[PATH_LONG];
+
+                            WORD Cursel = SendMessage(FileList, LB_GETCURSEL, NULL, NULL);
+                            SendMessage(FileList, LB_GETTEXT, Cursel, (LPARAM)RootPath_w);
+
+                            WCtoMB(RootPath_w, RootPath, sizeof(RootPath) / sizeof(RootPath[0]));
+
+                            if (OpenClipboard()) return -1;
+
+                            wchar_t Msg[PATH_LONG + 23];
+                            
+                            {//将文件路径复制到剪贴板
+                                EmptyClipboard();   //清空剪贴板
+
+                                //分配全局内存
+                                HGLOBAL hMem;
+                                hMem = GlobalAlloc(GMEM_MOVEABLE, strlen(RootPath) + 1);
+
+                                if (hMem == NULL)
+                                {
+                                    CloseClipboard();
+                                    return -1;
+                                }
+
+                                //拷贝数据到剪贴板内存
+                                LPTSTR lpStr = (LPTSTR)GlobalLock(hMem);
+
+                                strcpy_s((char*)lpStr, strlen(RootPath) + 1, RootPath);
+
+                                GlobalUnlock(hMem);
+
+                                //设置数据到剪贴板
+                                SetClipboardData(CF_TEXT, hMem);
+
+                                //关闭剪贴板
+                                CloseClipboard();
+
+                                wcscpy_s(Msg, RootPath_w);
+                                wcscat_s(Msg, L"\n（已复制到剪贴板）");
+                            }
+                            
+                            MessageBox(hWnd, Msg, L"位置", MB_OK);
+                            /*
+                            if (MessageBox(hWnd, Msg, L"位置", MB_OKCANCEL) == MB_OK)
+                            {
+                                HWND handle = NULL;
+                                ShellExecute(handle, L"explore", RootPath_w, NULL, NULL, SW_SHOWNORMAL);
+                            }
+                            */
+                            
+                            break;
+                        }
+                                                                        
+                    default:
+                        break;
+                    }
+                    
+                    
+                }            
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
