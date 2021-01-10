@@ -10,6 +10,9 @@
 HINSTANCE Instance;                             // 当前实例
 WCHAR szTitle[MAX_LOADSTRING];                  // 标题栏文本
 WCHAR szWindowClass[MAX_LOADSTRING];            // 主窗口类名
+int MWindowWidth = 550;                         // 主窗口宽度
+int MWindowHeight = 280;                        // 主窗口高度
+
 
 // 此代码模块中包含的函数的前向声明:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -50,10 +53,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         WS_EX_CLIENTEDGE,                               // 可选的窗口类型
         szWindowClass,                              // 窗口类的名称
         L"文件搜索",                    // 窗口标题
-        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX),            // 窗口风格
+        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SIZEBOX),            // 窗口风格
 
         // 窗口的位置与大小
-        CW_USEDEFAULT, CW_USEDEFAULT, 500, 280,
+        CW_USEDEFAULT, CW_USEDEFAULT, MWindowWidth, MWindowHeight,
 
         NULL,       // 父级窗口
         NULL,       // 窗口菜单
@@ -142,7 +145,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     TextBox_CLASS_NAME,
                     L"",
                     (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_BORDER),
-                    10, 35, 450, 25,
+                    10, 35, 510, 25,
                     hWnd,
                     (HMENU)UID_TextBox_RootPath,
                     Instance,
@@ -383,16 +386,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 wcscpy_s(Msg, RootPath_w);
                                 wcscat_s(Msg, L"\n（已复制到剪贴板）");
                             }
+
                             
-                            MessageBox(hWnd, Msg, L"位置", MB_OK);
-                            /*
-                            if (MessageBox(hWnd, Msg, L"位置", MB_OKCANCEL) == MB_OK)
+                            
+                            if (MessageBox(hWnd, Msg, L"位置", MB_OKCANCEL) == IDOK)
                             {
                                 HWND handle = NULL;
-                                ShellExecute(handle, L"explore", RootPath_w, NULL, NULL, SW_SHOWNORMAL);
+                                ShellExecute(handle, L"explorer", L"", NULL, NULL, SW_SHOW);
                             }
-                            */
-                            
+
                             break;
                         }
                                                                         
@@ -417,6 +419,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EndPaint(hWnd, &ps);
         }
         break;
+    case WM_SIZE:
+        {
+            MWindowWidth = LOWORD(lParam);
+            MWindowHeight = HIWORD(lParam);
+
+            SetWindowPos(Status, 0, 0, 0, 0, 0, NULL);
+            SetWindowPos(FileList, 0, 10, 120, MWindowWidth-20, MWindowHeight-140, NULL);
+
+            break;
+        }
     case WM_CLOSE:  //关闭窗口键
         if (MessageBox(hWnd, L"确定要退出吗？", L"注意", MB_OKCANCEL) == IDOK)
         {
