@@ -54,10 +54,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="FileFind-GUIversion-Debug.ico">
+    <Image Include="FileFind.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

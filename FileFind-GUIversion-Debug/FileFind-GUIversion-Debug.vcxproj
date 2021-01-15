@@ -156,8 +156,7 @@
     <ResourceCompile Include="FileFind-GUIversion-Debug.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="FileFind-GUIversion-Debug.ico" />
-    <Image Include="small.ico" />
+    <Image Include="FileFind.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

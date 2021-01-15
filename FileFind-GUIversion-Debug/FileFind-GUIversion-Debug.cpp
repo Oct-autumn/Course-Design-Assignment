@@ -43,12 +43,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MainWindow.hInstance = hInstance;
     MainWindow.lpszClassName = szWindowClass;
     MainWindow.lpszMenuName = MAKEINTRESOURCEW(IDC_FILEFINDGUIVERSIONDEBUG);
+    MainWindow.hIcon = LoadIcon(Instance, (LPCWSTR)IDI_ICON);
 
     RegisterClass(&MainWindow);
 
     // Create the window.
 
-    HWND hwnd = CreateWindowEx
+    hwnd = CreateWindowEx
     (
         WS_EX_CLIENTEDGE,                               // 可选的窗口类型
         szWindowClass,                              // 窗口类的名称
@@ -122,7 +123,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-    case WM_CREATE:
+    case WM_CREATE: //创建主窗口
         {
         //绘制控件
             {
@@ -231,7 +232,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 );
                 CreatCheck(ChoseButton2, 8);
 
-                Status = CreateWindow
+                Status = CreateWindow           //创建状态栏
                 (
                     L"msctls_statusbar32",
                     (PCTSTR)NULL,
@@ -248,9 +249,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wcscpy_s(ProgramStatus, L"就绪.");
             SendMessage(Status, WM_SETTEXT, NULL, (LPARAM)ProgramStatus);
             
+            break;
         }
-        break;
-    case WM_COMMAND:
+    case WM_COMMAND://窗口中的点击操作
         {
             WORD wNotifyCode = HIWORD(wParam);
             WORD wmId = LOWORD(wParam);
@@ -384,15 +385,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 CloseClipboard();
 
                                 wcscpy_s(Msg, RootPath_w);
-                                wcscat_s(Msg, L"\n（已复制到剪贴板）");
+                                wcscat_s(Msg, L"\n（已复制到剪贴板）\n是否打开文件（夹）位置？");
                             }
 
                             
                             
                             if (MessageBox(hWnd, Msg, L"位置", MB_OKCANCEL) == IDOK)
                             {
+                                for (int i = strlen(RootPath); i > 0; i--)
+                                {
+                                    if (RootPath[i] == '\\')
+                                    {
+                                        break;                                        
+                                    }
+                                    RootPath[i] = '\0';
+                                }
+                                MBtoWC(RootPath, RootPath_w, sizeof(RootPath_w) / sizeof(RootPath_w[0]));
+
                                 HWND handle = NULL;
-                                ShellExecute(handle, L"explorer", L"", NULL, NULL, SW_SHOW);
+                                ShellExecute(handle, L"explore", RootPath_w, NULL, NULL, SW_SHOW);
                             }
 
                             break;
@@ -407,9 +418,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
+            break;
         }
-        break;
-    case WM_PAINT:
+    case WM_PAINT:  //绘制窗口
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
@@ -417,9 +428,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_3DFACE + 1)); //填充背景颜色
 
             EndPaint(hWnd, &ps);
+            break;
         }
-        break;
-    case WM_SIZE:
+    case WM_SIZE:   //窗口控件自适应
         {
             MWindowWidth = LOWORD(lParam);
             MWindowHeight = HIWORD(lParam);
@@ -429,15 +440,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             break;
         }
-    case WM_CLOSE:  //关闭窗口键
-        if (MessageBox(hWnd, L"确定要退出吗？", L"注意", MB_OKCANCEL) == IDOK)
+    case WM_SIZING: //限制窗口最小大小
         {
-            DestroyWindow(hWnd);
+            RECT* SizeMsg = (RECT*)lParam;
+            if (SizeMsg->bottom - SizeMsg->top < 280)
+            {
+                SizeMsg->bottom = SizeMsg->top + 280;
+            }
+            if (SizeMsg->right - SizeMsg->left < 550)
+            {
+                SizeMsg->right = SizeMsg->left + 550;
+            }
+            break;
         }
-        break;
+    case WM_CLOSE:  //关闭窗口键
+        {
+            if (MessageBox(hWnd, L"确定要退出吗？", L"注意", MB_OKCANCEL) == IDOK)
+            {
+                DestroyWindow(hWnd);
+            }
+            break;
+        }
     case WM_DESTROY://摧毁窗口
-        PostQuitMessage(0);
-        break;
+        {
+            PostQuitMessage(0);
+            break;
+        }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -486,54 +514,55 @@ INT_PTR CALLBACK Setting(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_PAINT:
-    {
-        ShowHidden_CheckBox = CreateWindowEx               //创建“搜索根目录”静态文本框
-        (
-            0,
-            CheckBox_CLASS_NAME,
-            L"搜索隐藏文件（夹）",
-            (WS_CHILD | WS_VISIBLE | BS_CHECKBOX),
-            10, 10, 150, 25,
-            hDlg,
-            (HMENU)UID_ShowHidden,
-            Instance,
-            NULL
-        );
-        CreatCheck(ShowHidden_CheckBox, 2);
-
-        if (ShowHidden)
         {
-            SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_CHECKED, NULL);
-        }
-        break;
-    }
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
+            ShowHidden_CheckBox = CreateWindowEx               //创建“搜索根目录”静态文本框
+            (
+                0,
+                CheckBox_CLASS_NAME,
+                L"搜索隐藏文件（夹）",
+                (WS_CHILD | WS_VISIBLE | BS_CHECKBOX),
+                10, 10, 150, 25,
+                hDlg,
+                (HMENU)UID_ShowHidden,
+                Instance,
+                NULL
+            );
+            CreatCheck(ShowHidden_CheckBox, 2);
 
-        switch (wmId)
-        {
-            case UID_ShowHidden:
+            if (ShowHidden)
             {
-                if (SendMessage(ShowHidden_CheckBox, BM_GETCHECK, NULL, NULL) == BST_CHECKED)
+                SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_CHECKED, NULL);
+            }
+            break;
+        }
+    case WM_COMMAND:
+        {
+            int wmId = LOWORD(wParam);
+
+            switch (wmId)
+            {
+                case UID_ShowHidden:
                 {
-                    ShowHidden = 0;
-                    SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_UNCHECKED, NULL);
-                }
-                else
-                {
-                    ShowHidden = 1;
-                    SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_CHECKED, NULL);
+                    if (SendMessage(ShowHidden_CheckBox, BM_GETCHECK, NULL, NULL) == BST_CHECKED)
+                    {
+                        ShowHidden = 0;
+                        SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_UNCHECKED, NULL);
+                    }
+                    else
+                    {
+                        ShowHidden = 1;
+                        SendMessage(ShowHidden_CheckBox, BM_SETCHECK, BST_CHECKED, NULL);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }    
     case WM_CLOSE:
-        EndDialog(hDlg, LOWORD(wParam));
-        return (INT_PTR)TRUE;
-        break;
-
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+            break;
+        }
     }
     return (INT_PTR)FALSE;
 }

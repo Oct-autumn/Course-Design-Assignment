@@ -1,3 +1,8 @@
+/*
+可移植库，用于转换多字节字符串与宽字符字符串
+
+Programmed by Oct_Autumn
+*/
 #pragma once
 
 #include <Windows.h>
